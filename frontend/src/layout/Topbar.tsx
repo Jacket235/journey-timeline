@@ -1,4 +1,5 @@
 import { useState } from "react"
+import getTestUser from "../functions/getTestUser";
 
 export default function Topbar() {
     const [showLogin, setShowLogin] = useState(false);
@@ -19,7 +20,7 @@ export default function Topbar() {
                         </div>
                         <div className="col-6 d-flex justify-content-end">
                             <button className="btn btn-secondary mx-1" onClick={() => setShowLogin(true)}>Log In</button>
-                            <button className="btn btn-secondary mx-1">Sign Up</button>
+                            <button className="btn btn-secondary mx-1" onClick={() => getTestUser()}>Sign Up</button>
                         </div>
                     </div>
                 </div>
@@ -45,7 +46,7 @@ export default function Topbar() {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button className="btn btn-primary" onClick={handleLogin}>Log In</button>
+                                <button className="btn btn-primary">Log In</button>
                                 <button className="btn btn-secondary" onClick={() => setShowLogin(false)}>Cancel</button>
                             </div>
                         </div>
