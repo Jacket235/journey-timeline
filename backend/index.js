@@ -11,15 +11,15 @@ app.use(express.json());
 app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
 
-    const checkQuery = "SELECT * FROM users WHERE username = ?";
-    connection.query(checkQuery, [username], (err, result) => {
+    const checkQuery = "SELECT * FROM users WHERE username = ? OR email = ?";
+    connection.query(checkQuery, [username, email], (err, result) => {
         if (err) {
             console.error("Error signing up", err);
             return res.status(500).json({ error: "Database error" });
         }
 
         if (result.length > 0) {
-            return res.status(409).json({ error: "Email already registered" });
+            return res.status(409).json({ error: "Username or E-mail taken" });
         }
     })
 
