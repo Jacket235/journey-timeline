@@ -8,18 +8,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/user', (req, res) => {
-    const query = 'SELECT * FROM users LIMIT 1';
-    connection.query(query, (err, results) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-        res.json(results[0] || {});
-    });
+app.post("/signup", (req, res) => {
+    const { username, email, password } = req.body;
+
+
+    console.log(username);
+    // const query = "INSERT INTO users (username, password) VALUES (?, ?, ?)"
+    // connection.query(query, [username, password]);
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
