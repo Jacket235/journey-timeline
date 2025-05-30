@@ -15,7 +15,7 @@ app.post("/signup", (req, res) => {
     console.log("Email: " + email);
     console.log("Password: " + password);
 
-    res.status(201).json({ message: "User registered" });
+    res.status(201).json({ message: "User registered", nick: username, mail: email, pass: password });
     // const query = "INSERT INTO users (username, password) VALUES (?, ?, ?)"
     // connection.query(query, [username, password]);
 });
