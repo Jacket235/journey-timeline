@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/desktop-app/static/css/main.d9aeadc8.css",
-    "main.js": "/desktop-app/static/js/main.35c3f31c.js",
-    "index.html": "/desktop-app/index.html",
-    "main.d9aeadc8.css.map": "/desktop-app/static/css/main.d9aeadc8.css.map",
-    "main.35c3f31c.js.map": "/desktop-app/static/js/main.35c3f31c.js.map"
+    "main.css": "/database-app/static/css/main.d9aeadc8.css",
+    "main.js": "/database-app/static/js/main.35c3f31c.js",
+    "index.html": "/database-app/index.html",
+    "main.d9aeadc8.css.map": "/database-app/static/css/main.d9aeadc8.css.map",
+    "main.35c3f31c.js.map": "/database-app/static/js/main.35c3f31c.js.map"
   },
   "entrypoints": [
     "static/css/main.d9aeadc8.css",
