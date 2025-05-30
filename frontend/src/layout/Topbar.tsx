@@ -1,10 +1,12 @@
 import { useState } from "react"
-import getTestUser from "../functions/getTestUser";
+import userSignUp from "../functions/userSignUp";
 
 export default function Topbar() {
     const [showLogin, setShowLogin] = useState(false);
+    const [showSignUp, setShowSignUp] = useState(false);
 
     const [userName, setUserName] = useState<string>("");
+    const [userEmail, setUserEmail] = useState<string>("");
     const [userPassword, setPassword] = useState<string>("");
 
     const handleLogin = async () => {
@@ -20,7 +22,7 @@ export default function Topbar() {
                         </div>
                         <div className="col-6 d-flex justify-content-end">
                             <button className="btn btn-secondary mx-1" onClick={() => setShowLogin(true)}>Log In</button>
-                            <button className="btn btn-secondary mx-1" onClick={() => getTestUser()}>Sign Up</button>
+                            <button className="btn btn-secondary mx-1" onClick={() => setShowSignUp(true)}>Sign Up</button>
                         </div>
                     </div>
                 </div>
@@ -47,6 +49,38 @@ export default function Topbar() {
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-primary">Log In</button>
+                                <button className="btn btn-secondary" onClick={() => setShowLogin(false)}>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showSignUp && (
+                <div className="modal d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Sign Up</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowSignUp(false)}>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label className="form-label">Username</label>
+                                    <input type="text" className="form-control" value={userName} onChange={(e) => setUserName(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">E-mail</label>
+                                    <input type="text" className="form-control" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Password</label>
+                                    <input type="password" className="form-control" value={userPassword} onChange={(e) => setPassword(e.target.value)} />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-primary" onClick={() => userSignUp(userName, userEmail, userPassword)}>Register</button>
                                 <button className="btn btn-secondary" onClick={() => setShowLogin(false)}>Cancel</button>
                             </div>
                         </div>
