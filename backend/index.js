@@ -11,9 +11,9 @@ app.use(express.json());
 app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
 
-    console.log(username);
-    console.log(email);
-    console.log(password);
+    console.log("Username: " + username);
+    console.log("Email: " + email);
+    console.log("Password: " + password);
 
     res.status(201).json({ message: "User registered" });
     // const query = "INSERT INTO users (username, password) VALUES (?, ?, ?)"
