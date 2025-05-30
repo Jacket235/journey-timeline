@@ -11,8 +11,20 @@ app.use(express.json());
 app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
 
-    const query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
-    connection.query(query, [username, email, password], (err, result) => {
+    const checkQuery = "SELECT * FROM users WHERE username = ?";
+    connection.query(checkQuery, [username], (err, result) => {
+        if (err) {
+            console.error("Error signing up", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+
+        if (result.length > 0) {
+            return res.status(409).json({ error: "Email already registered" });
+        }
+    })
+
+    const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
+    connection.query(insertQuery, [username, email, password], (err, result) => {
         if (err) {
             console.error("Error signing up", err);
             return res.status(500).json({ error: "Database error" });
