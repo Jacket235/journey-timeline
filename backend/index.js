@@ -21,17 +21,17 @@ app.post("/signup", (req, res) => {
         if (result.length > 0) {
             return res.status(409).json({ error: "Username or E-mail taken" });
         }
+
+        const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
+        connection.query(insertQuery, [username, email, password], (err, result) => {
+            if (err) {
+                console.error("Error signing up", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+
+            res.status(201).send("Registered");
+        });
     })
-
-    const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
-    connection.query(insertQuery, [username, email, password], (err, result) => {
-        if (err) {
-            console.error("Error signing up", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-
-        res.status(201).send("Registered");
-    });
 });
 
 const PORT = process.env.PORT || 8080;
