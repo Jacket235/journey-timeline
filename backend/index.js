@@ -7,11 +7,7 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
-// app.use(cors());
-app.use(cors({
-    origin: 'http://localhost:3000',  // lub '*' tylko do testów (niezalecane z credentials)
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
 app.post("/signup", (req, res) => {
@@ -70,7 +66,7 @@ app.post("/login", (req, res) => {
     const { username, password } = req.body;
 
     const findUserQuery = "SELECT * FROM users WHERE username = ?";
-    connection.query(findUserQuery, [username], async () => {
+    connection.query(findUserQuery, [username], async (err, result) => {
         if (err) {
             console.error("Error signing in", err);
             return res.status(500).json({ error: "Database error" });
