@@ -83,16 +83,14 @@ app.post("/login", (req, res) => {
             }
 
             if (response) {
-                res.send({ message: "Got a response" });
-                // const id = result[0].id;
-                // const email = result[0].email;
+                const id = result[0].id;
+                const email = result[0].email;
 
-                // const token = jwt.sign({ id, email }, `${process.env.SECRETKEY}`, {
-                //     expiresIn: 300
-                // })
-                // // req.session.user = result;
+                const token = jwt.sign({ id, email }, process.env.SECRETKEY, {
+                    expiresIn: 300
+                });
 
-                // res.json({ auth: true, token: token, user: { id: id, email: email } });
+                res.json({ auth: true, token: token, user: { id, email } });
             } else {
                 res.send({ message: "Wrong username/password" });
             }
