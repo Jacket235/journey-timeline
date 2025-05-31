@@ -76,7 +76,27 @@ app.post("/login", (req, res) => {
             return res.status(409).json({ error: "User doesn't exist" });
         }
 
-        res.send({ email: result[0].email })
+        bcrypt.compare(password, result[0].password, (error, response) => {
+            if (error) {
+                console.error("Error comparing passwords", error);
+                return res.status(500).json({ error: "Bcrypt error" });
+            }
+
+            if (response) {
+                res.send({ message: "Got a response" });
+                // const id = result[0].id;
+                // const email = result[0].email;
+
+                // const token = jwt.sign({ id, email }, `${process.env.SECRETKEY}`, {
+                //     expiresIn: 300
+                // })
+                // // req.session.user = result;
+
+                // res.json({ auth: true, token: token, user: { id: id, email: email } });
+            } else {
+                res.send({ message: "Wrong username/password" });
+            }
+        });
     });
 });
 
