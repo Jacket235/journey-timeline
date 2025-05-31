@@ -7,7 +7,11 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',  // lub '*' tylko do testów (niezalecane z credentials)
+    credentials: true
+}));
 app.use(express.json());
 
 app.post("/signup", (req, res) => {
