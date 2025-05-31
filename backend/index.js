@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const connection = require('./config');
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
@@ -39,6 +40,58 @@ app.post("/signup", (req, res) => {
             res.status(201).send("Registered");
         });
     })
+});
+
+const verifyJWT = async (req, res) => {
+    const token = req.headers["x-access-token"];
+
+    if (!token) {
+        res.send("No token");
+    } else {
+        jwt.verify(token, `${process.env.SECRETKEY}`, (err, decoded) => {
+            if (err) {
+                res.json({ auth: false, message: "Couldn't authenticate" });
+            } else {
+                req.userId = decoded.id;
+            }
+        });
+    }
+}
+
+app.get("/isUserAuth", verifyJWT, (req, res) => {
+    res.send("Authenticated.");
+});
+
+app.post("/login", (req, res) => {
+    const { username, password } = req.body;
+
+    const findUserQuery = "SELECT * FROM users WHERE username = ?";
+    connection.query(findUserQuery, [username], async () => {
+        if (err) {
+            console.error("Error signing in", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+
+        if (result.length <= 0) {
+            return res.status(409).json({ error: "User doesn't exist" });
+        }
+
+        bcrypt.compare(password, result[0].password, (error, response) => {
+            if (response) {
+                const id = result[0].id;
+                const email = result[0].email;
+
+                const token = jwt.sign({ id, email }, `${process.env.SECRETKEY}`, {
+                    expiresIn: 300
+                })
+                req.session.user = result;
+
+                res.json({ auth: true, token: token, user: { id: id, email: email } });
+            } else {
+                res.send({ message: "Wrong username/password" });
+            }
+        });
+    });
 });
 
 const PORT = process.env.PORT || 8080;
