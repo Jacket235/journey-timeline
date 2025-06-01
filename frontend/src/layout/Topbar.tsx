@@ -1,28 +1,67 @@
 import { useState } from "react"
 import userSignUp from "../functions/userSignUp";
+import userLogIn from "../functions/userLogIn";
 
 export default function Topbar() {
     const [showLogin, setShowLogin] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
 
+    const [showWrongInfo, setShowWrongInfo] = useState(false);
+
     const [userName, setUserName] = useState<string>("");
     const [userEmail, setUserEmail] = useState<string>("");
     const [userPassword, setPassword] = useState<string>("");
 
+    const [userLoggedIn, setUserLoggedIn] = useState<boolean>(false);
+    const [userSignedInUsername, setUserSignedInUsername] = useState<string>("");
+    const [token, setToken] = useState<string>();
+
     const handleLogin = async () => {
+        const login = await userLogIn(userName, userPassword);
+
+        if (login) {
+            setUserLoggedIn(true);
+            setShowLogin(false);
+            setUserSignedInUsername(login.user.username);
+            setToken("Bearer " + login.token);
+        } else {
+            setShowWrongInfo(true);
+        }
+    }
+
+    const handleRegister = async () => {
+        const register = await userSignUp(userName, userEmail, userPassword);
+
+        setShowSignUp(false);
+        setShowLogin(true);
+    }
+
+    const handleSignOut = () => {
+        setUserLoggedIn(false);
+        setUserSignedInUsername("");
+        setToken("");
     }
 
     return (
         <>
             <div className="container-fluid">
                 <div className="row">
-                    <div className="col-12 bg-dark p-2 d-flex">
+                    <div className="col-12 bg-dark p-2 align-items-center d-flex">
                         <div className="col-6 text-white">
                             <span className="h3">Database app</span>
                         </div>
-                        <div className="col-6 d-flex justify-content-end">
-                            <button className="btn btn-secondary mx-1" onClick={() => setShowLogin(true)}>Log In</button>
-                            <button className="btn btn-secondary mx-1" onClick={() => setShowSignUp(true)}>Sign Up</button>
+                        <div className="col-6 d-flex align-items-center justify-content-end">
+                            {!userLoggedIn ? (
+                                <>
+                                    <button className="btn btn-secondary mx-1" onClick={() => setShowLogin(true)}>Log In</button>
+                                    <button className="btn btn-secondary mx-1" onClick={() => setShowSignUp(true)}>Sign Up</button>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="text-white mx-2">Hello, {userSignedInUsername}</span>
+                                    <button className="btn btn-secondary mx-1" onClick={handleSignOut}>Sign Out</button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -46,9 +85,14 @@ export default function Topbar() {
                                     <label className="form-label">Password</label>
                                     <input type="password" className="form-control" value={userPassword} onChange={(e) => setPassword(e.target.value)} />
                                 </div>
+                                {showWrongInfo && (
+                                    <div className="text-danger text-center fw-bold mt-2">
+                                        Wrong username or password
+                                    </div>
+                                )}
                             </div>
                             <div className="modal-footer">
-                                <button className="btn btn-primary">Log In</button>
+                                <button className="btn btn-primary" onClick={handleLogin}>Log In</button>
                                 <button className="btn btn-secondary" onClick={() => setShowLogin(false)}>Cancel</button>
                             </div>
                         </div>
@@ -80,8 +124,8 @@ export default function Topbar() {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button className="btn btn-primary" onClick={() => userSignUp(userName, userEmail, userPassword)}>Register</button>
-                                <button className="btn btn-secondary" onClick={() => setShowLogin(false)}>Cancel</button>
+                                <button className="btn btn-primary" onClick={handleRegister}>Register</button>
+                                <button className="btn btn-secondary" onClick={() => setShowSignUp(false)}>Cancel</button>
                             </div>
                         </div>
                     </div>
@@ -90,5 +134,3 @@ export default function Topbar() {
         </>
     )
 }
-
-// Token: 15ee25c5-e600-4268-a1ef-0dc489a1a6e8
