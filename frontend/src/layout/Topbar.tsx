@@ -13,17 +13,13 @@ export default function Topbar() {
     const [userPassword, setPassword] = useState<string>("");
 
     const [userLoggedIn, setUserLoggedIn] = useState<boolean>(false);
-    const [userSignedInUsername, setUserSignedInUsername] = useState<string>("");
-    const [token, setToken] = useState<string>();
 
     const handleLogin = async () => {
-        const login = await userLogIn(userName, userPassword);
+        const login = await userLogIn(userEmail, userName, userPassword);
 
         if (login) {
             setUserLoggedIn(true);
             setShowLogin(false);
-            setUserSignedInUsername(login.user.username);
-            setToken("Bearer " + login.token);
         } else {
             setShowWrongInfo(true);
         }
@@ -38,8 +34,6 @@ export default function Topbar() {
 
     const handleSignOut = () => {
         setUserLoggedIn(false);
-        setUserSignedInUsername("");
-        setToken("");
     }
 
     return (
@@ -48,17 +42,17 @@ export default function Topbar() {
                 <div className="row">
                     <div className="col-12 bg-dark p-2 align-items-center d-flex">
                         <div className="col-6 text-white">
-                            <span className="h3">Database app</span>
+                            <span className="h3">Plan your trips!</span>
                         </div>
                         <div className="col-6 d-flex align-items-center justify-content-end">
                             {!userLoggedIn ? (
                                 <>
-                                    <button className="btn btn-secondary mx-1" onClick={() => setShowLogin(true)}>Log In</button>
-                                    <button className="btn btn-secondary mx-1" onClick={() => setShowSignUp(true)}>Sign Up</button>
+                                    <button className="btn btn-primary mx-1" onClick={() => setShowLogin(true)}>Log In</button>
+                                    <button className="btn btn-primary mx-1" onClick={() => setShowSignUp(true)}>Sign Up</button>
                                 </>
                             ) : (
                                 <>
-                                    <span className="text-white mx-2">Hello, {userSignedInUsername}</span>
+                                    <span className="text-white mx-2">Hello, XYZ</span>
                                     <button className="btn btn-secondary mx-1" onClick={handleSignOut}>Sign Out</button>
                                 </>
                             )}
@@ -78,8 +72,8 @@ export default function Topbar() {
                             </div>
                             <div className="modal-body">
                                 <div className="mb-3">
-                                    <label className="form-label">Username</label>
-                                    <input type="text" className="form-control" value={userName} onChange={(e) => setUserName(e.target.value)} />
+                                    <label className="form-label">E-mail</label>
+                                    <input type="text" className="form-control" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Password</label>
@@ -87,7 +81,7 @@ export default function Topbar() {
                                 </div>
                                 {showWrongInfo && (
                                     <div className="text-danger text-center fw-bold mt-2">
-                                        Wrong username or password
+                                        Wrong e-mail or password
                                     </div>
                                 )}
                             </div>
