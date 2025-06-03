@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const connection = require('./config');
 const jwt = require("jsonwebtoken");
 const dayjs = require("dayjs");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -49,7 +50,7 @@ app.post("/refreshToken", (req, res) => {
 
     const query = "SELECT * FROM refresh_tokens WHERE token = ?";
 
-    connection.query(query, [token], (err, result) => {
+    connection.query(query, [refreshToken], (err, result) => {
         if (err) return res.sendStatus(500)
         if (result.length === 0) return res.sendStatus(403);
 
@@ -73,7 +74,7 @@ app.post("/logout", (req, res) => {
     if (!refreshToken) return res.sendStatus(400);
 
     const deleteQuery = "DELETE FROM refresh_tokens WHERE token = ?"
-    connection.query(deleteQuery, [token], (err) => {
+    connection.query(deleteQuery, [refreshToken], (err) => {
         if (err) return res.sendStatus(500);
 
         res.clearCookie("refreshToken", {
