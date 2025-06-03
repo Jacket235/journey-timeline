@@ -80,7 +80,7 @@ app.post("/logout", (req, res) => {
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: true,
-            sameSite: "None" // CHANGE
+            sameSite: "Strict" // CHANGE
         });
 
         res.sendStatus(204);
@@ -112,7 +112,7 @@ app.post("/login", (req, res) => {
                 res.cookie("refreshToken", refreshToken, {
                     httpOnly: true,
                     secure: true,
-                    sameSite: "None", // CHANGE
+                    sameSite: "Strict", // CHANGE
                     maxAge: 1 * 24 * 60 * 60 * 1000 // 1 day
                 });
 
