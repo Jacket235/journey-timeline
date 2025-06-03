@@ -14,7 +14,7 @@ app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
-        return res.status(400).json({ error: "All fields are required" });
+        return res.sendStatus(400);
     }
 
     const checkQuery = "SELECT * FROM users WHERE username = ? OR email = ?";
@@ -32,7 +32,7 @@ app.post("/signup", (req, res) => {
         const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
         connection.query(insertQuery, [username, email, hashedPassword], (err, result) => {
             if (err) {
-                return res.setStatus(500);
+                return res.sendStatus(500);
             }
 
             return res.json({ success: true });
@@ -40,43 +40,63 @@ app.post("/signup", (req, res) => {
     })
 });
 
+app.post("/refreshToken", (req, res) => {
+    const refreshToken = req.body.token;
+
+    if (refreshToken == null) return res.sendStatus(401);
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+
+        const accessToken = jwt.sign({ email: user.email, username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+        res.json({ accessToken: accessToken });
+    })
+})
+
 app.post("/login", (req, res) => {
-    const { email, password } = req.body;
+    const email = req.body.email;
+    const username = req.body.username;
+    const password = req.body.password;
 
     const findUserQuery = "SELECT * FROM users WHERE email = ?";
     connection.query(findUserQuery, [email], async (err, result) => {
         if (err) {
-            return res.status(500).json({ error: "Database error" });
+            return res.sendStatus(500);
         }
 
         if (result.length <= 0) {
-            return res.status(409).json({ error: "Unable to find user" });
+            return res.sendStatus(409);
         }
 
         bcrypt.compare(password, result[0].password, (error, response) => {
             if (error) {
-                console.error("Error comparing passwords", error);
-                return res.status(500).json({ error: "Bcrypt error" });
+                return res.sendStatus(500)
             }
 
             if (response) {
-                const id = result[0].id;
-                const username = result[0].username;
-                const email = result[0].email;
+                const accessToken = jwt.sign({ email: email, username: username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
+                const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET)
 
-                const token = jwt.sign({ id, email }, process.env.SECRETKEY, {
-                    expiresIn: 300
-                });
-
-                res.json({ auth: true, token: token, user: { id, username, email } });
-            } else {
-                res.send({ auth: false, message: "Wrong username/password" });
+                res.json({ accessToken: accessToken })
             }
         });
     });
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (token == null) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+
+        req.user = user;
+        next()
+    })
+}
+
+app.listen(8080, () => {
+    console.log(`Server is running on port 800`);
 });
