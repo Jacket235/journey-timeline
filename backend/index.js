@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const connection = require('./config');
 const jwt = require("jsonwebtoken");
+const dayjs = require("dayjs");
 
 const app = express();
 
@@ -45,11 +46,34 @@ app.post("/refreshToken", (req, res) => {
 
     if (refreshToken == null) return res.sendStatus(401);
 
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
+    const query = "SELECT * FROM refresh_tokens WHERE token = ?";
 
-        const accessToken = jwt.sign({ email: user.email, username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
-        res.json({ accessToken: accessToken });
+    connection.query(query, [token], (err, result) => {
+        if (err) return res.sendStatus(500)
+        if (result.length === 0) return res.sendStatus(403);
+
+        const expiresAt = new Date(result[0].expires_at);
+        if (expiresAt < new Date()) {
+            return res.status(403).json({ message: "Refresh token expired" });
+        }
+
+        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+            if (err) return res.sendStatus(403);
+
+            const accessToken = jwt.sign({ email: user.email, username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+            res.json({ accessToken: accessToken });
+        })
+    })
+})
+
+app.post("/logout", (req, res) => {
+    const token = req.body.token;
+
+    const deleteQuery = "DELETE FROM refresh_tokens WHERE token = ?"
+    connection.query(deleteQuery, [token], (err) => {
+        if (err) return res.sendStatus(500);
+
+        res.sendStatus(204);
     })
 })
 
@@ -73,11 +97,17 @@ app.post("/login", (req, res) => {
 
             if (response) {
                 const accessToken = jwt.sign({ email: email, username: username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
-                const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET)
+                const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" })
 
-                res.json({ accessToken: accessToken })
+                const expiresAt = dayjs().add(7, 'day').format("YYYY-MM-DD HH:mm:ss");
+                const insertRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?)";
+                connection.query(insertRefreshTokenQuery, [refreshToken, email, expiresAt], (err) => {
+                    if (err) return res.sendStatus(500);
+
+                    res.json({ accessToken: accessToken, refreshToken: refreshToken })
+                })
             } else {
-                return res.sendStatus(401).json({ success: false, message: "Wrong password" });
+                return res.sendStatus(401);
             }
         });
     });
