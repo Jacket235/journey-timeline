@@ -54,9 +54,7 @@ app.post("/refreshToken", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-    const email = req.body.email;
-    const username = req.body.username;
-    const password = req.body.password;
+    const { email, username, password } = req.body;
 
     const findUserQuery = "SELECT * FROM users WHERE email = ?";
     connection.query(findUserQuery, [email], async (err, result) => {
@@ -78,6 +76,8 @@ app.post("/login", (req, res) => {
                 const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET)
 
                 res.json({ accessToken: accessToken })
+            } else {
+                return res.sendStatus(401).json({ success: false, message: "Wrong password" });
             }
         });
     });
