@@ -54,7 +54,12 @@ export default function Topbar() {
     }
 
     useEffect(() => {
-        handleAutoLogin();
+        if (document.readyState === "complete") {
+            handleAutoLogin();
+        } else {
+            window.addEventListener("load", handleAutoLogin);
+            return () => window.removeEventListener("load", handleAutoLogin);
+        }
     }, []);
 
     return (
