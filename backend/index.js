@@ -10,6 +10,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
@@ -42,7 +43,7 @@ app.post("/signup", (req, res) => {
 });
 
 app.post("/refreshToken", (req, res) => {
-    const refreshToken = req.body.token;
+    const refreshToken = req.cookies.refreshToken;
 
     if (refreshToken == null) return res.sendStatus(401);
 
@@ -67,11 +68,19 @@ app.post("/refreshToken", (req, res) => {
 })
 
 app.post("/logout", (req, res) => {
-    const token = req.body.token;
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) return res.sendStatus(400);
 
     const deleteQuery = "DELETE FROM refresh_tokens WHERE token = ?"
     connection.query(deleteQuery, [token], (err) => {
         if (err) return res.sendStatus(500);
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "Strict"
+        });
 
         res.sendStatus(204);
     })
@@ -97,14 +106,21 @@ app.post("/login", (req, res) => {
 
             if (response) {
                 const accessToken = jwt.sign({ email: email, username: username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
-                const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" })
+                const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1d" })
 
-                const expiresAt = dayjs().add(7, 'day').format("YYYY-MM-DD HH:mm:ss");
+                res.cookie("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "Strict",
+                    maxAge: 1 * 24 * 60 * 60 * 1000 // 1 day
+                });
+
+                const expiresAt = dayjs().add(1, 'day').format("YYYY-MM-DD HH:mm:ss");
                 const insertRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?)";
                 connection.query(insertRefreshTokenQuery, [refreshToken, email, expiresAt], (err) => {
                     if (err) return res.sendStatus(500);
 
-                    res.json({ accessToken: accessToken, refreshToken: refreshToken })
+                    res.json({ accessToken: accessToken })
                 })
             } else {
                 return res.sendStatus(401);
