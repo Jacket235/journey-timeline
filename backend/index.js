@@ -20,12 +20,11 @@ app.post("/signup", (req, res) => {
     const checkQuery = "SELECT * FROM users WHERE username = ? OR email = ?";
     connection.query(checkQuery, [username, email], async (err, result) => {
         if (err) {
-            console.error("Error signing up", err);
-            return res.status(500).json({ error: "Database error" });
+            return res.status(500).json({ success: false, error: "Database error" });
         }
 
         if (result.length > 0) {
-            return res.status(409).json({ error: "Username or E-mail taken" });
+            return res.status(409).json({ success: false, error: "Username or E-mail taken" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -33,47 +32,25 @@ app.post("/signup", (req, res) => {
         const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
         connection.query(insertQuery, [username, email, hashedPassword], (err, result) => {
             if (err) {
-                console.error("Error signing up", err);
-                return res.status(500).json({ error: "Database error" });
+                return res.setStatus(500);
             }
 
-            res.status(201).send("Registered");
+            return res.json({ success: true });
         });
     })
 });
 
-const verifyJWT = async (req, res) => {
-    const token = req.headers["x-access-token"];
-
-    if (!token) {
-        res.send("No token");
-    } else {
-        jwt.verify(token, `${process.env.SECRETKEY}`, (err, decoded) => {
-            if (err) {
-                res.json({ auth: false, message: "Couldn't authenticate" });
-            } else {
-                req.userId = decoded.id;
-            }
-        });
-    }
-}
-
-app.get("/isUserAuth", verifyJWT, (req, res) => {
-    res.send("Authenticated.");
-});
-
 app.post("/login", (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const findUserQuery = "SELECT * FROM users WHERE username = ?";
-    connection.query(findUserQuery, [username], async (err, result) => {
+    const findUserQuery = "SELECT * FROM users WHERE email = ?";
+    connection.query(findUserQuery, [email], async (err, result) => {
         if (err) {
-            console.error("Error signing in", err);
             return res.status(500).json({ error: "Database error" });
         }
 
         if (result.length <= 0) {
-            return res.status(409).json({ error: "User doesn't exist" });
+            return res.status(409).json({ error: "Unable to find user" });
         }
 
         bcrypt.compare(password, result[0].password, (error, response) => {
@@ -93,7 +70,7 @@ app.post("/login", (req, res) => {
 
                 res.json({ auth: true, token: token, user: { id, username, email } });
             } else {
-                res.send({ message: "Wrong username/password" });
+                res.send({ auth: false, message: "Wrong username/password" });
             }
         });
     });
