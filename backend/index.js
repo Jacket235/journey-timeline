@@ -49,6 +49,8 @@ app.post("/signup", (req, res) => {
 app.post("/refreshToken", (req, res) => {
     const refreshToken = req.cookies.refreshToken;
 
+    console.log("Incoming cookies: ", req.cookies);
+
     if (refreshToken == null) return res.sendStatus(401);
 
     const query = "SELECT * FROM refresh_tokens WHERE token = ?";
@@ -82,7 +84,7 @@ app.post("/logout", (req, res) => {
 
         res.clearCookie("refreshToken", {
             httpOnly: true,
-            secure: true,
+            secure: false, // CHANGE LATER
             sameSite: "Strict"
         });
 
@@ -114,7 +116,7 @@ app.post("/login", (req, res) => {
 
                 res.cookie("refreshToken", refreshToken, {
                     httpOnly: true,
-                    secure: true,
+                    secure: false, // CHANGE LATER
                     sameSite: "Strict",
                     maxAge: 1 * 24 * 60 * 60 * 1000 // 1 day
                 });
