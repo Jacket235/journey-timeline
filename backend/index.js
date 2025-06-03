@@ -55,7 +55,6 @@ app.post("/refreshToken", (req, res) => {
 
 app.post("/login", (req, res) => {
     const email = req.body.email;
-    const username = req.body.username;
     const password = req.body.password;
 
     const findUserQuery = "SELECT * FROM users WHERE email = ?";
