@@ -5,8 +5,6 @@ const userLogIn = (email: string, username: string, password: string) => {
         email,
         username,
         password
-    }, {
-        withCredentials: true
     })
         .then((res) => {
             return res.data

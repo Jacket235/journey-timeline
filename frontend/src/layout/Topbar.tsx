@@ -1,9 +1,6 @@
 import { useState } from "react"
 import userSignUp from "../functions/userSignUp";
 import userLogIn from "../functions/userLogIn";
-import userLogOut from "../functions/userLogOut";
-import userAutoLogIn from "../functions/userAutoLogIn";
-import { useEffect } from "react";
 
 export default function Topbar() {
     const [showLogin, setShowLogin] = useState(false);
@@ -18,15 +15,6 @@ export default function Topbar() {
     const [userLoggedIn, setUserLoggedIn] = useState<boolean>(false);
 
     const [accessToken, setAccessToken] = useState<string>("");
-
-    const handleAutoLogin = async () => {
-        const autoLogin = await userAutoLogIn();
-
-        if (autoLogin) {
-            setAccessToken(autoLogin.accessToken);
-            setUserLoggedIn(true);
-        }
-    }
 
     const handleLogin = async () => {
         const login = await userLogIn(userEmail, userName, userPassword);
@@ -48,19 +36,9 @@ export default function Topbar() {
     }
 
     const handleSignOut = async () => {
-        await userLogOut();
         setAccessToken("");
         setUserLoggedIn(false);
     }
-
-    useEffect(() => {
-        if (document.readyState === "complete") {
-            handleAutoLogin();
-        } else {
-            window.addEventListener("load", handleAutoLogin);
-            return () => window.removeEventListener("load", handleAutoLogin);
-        }
-    }, []);
 
     return (
         <>
