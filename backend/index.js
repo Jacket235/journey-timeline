@@ -63,14 +63,19 @@ app.post("/login", (req, res) => {
 
             if (response) {
                 const accessToken = jwt.sign({ email: email, username: username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
+                const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET)
 
-                res.json({ accessToken: accessToken })
+                res.json({ accessToken: accessToken, refreshToken: refreshToken })
             } else {
                 return res.sendStatus(401);
             }
         });
     });
 });
+
+// app.get("/me", (req, res) => {
+//     res.json({ user: req.user });
+// })
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
