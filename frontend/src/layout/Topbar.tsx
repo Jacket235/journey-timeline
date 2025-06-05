@@ -3,6 +3,13 @@ import userSignUp from "../functions/userSignUp";
 import userLogIn from "../functions/userLogIn";
 import userLogOut from "../functions/userLogOut";
 import { useCookies } from 'react-cookie';
+import jwt_decode, { jwtDecode } from "jwt-decode";
+import { Token } from "typescript";
+
+interface TokenPayload {
+    email: string,
+    username: string;
+}
 
 export default function Topbar() {
     const [cookies, setCookie, removeCookie] = useCookies();
@@ -21,12 +28,16 @@ export default function Topbar() {
     const [accessToken, setAccessToken] = useState<string>("");
 
     const handleLogin = async () => {
-        const login = await userLogIn(userEmail, userName, userPassword);
+        const login = await userLogIn(userEmail, userPassword);
 
         if (login) {
             setUserLoggedIn(true);
             setShowLogin(false);
             setAccessToken(login.accessToken)
+
+            const tokenInfo = jwtDecode<TokenPayload>(login.accessToken);
+
+            setUserName(tokenInfo.username);
 
             setCookie("refreshToken", login.refreshToken, {
                 path: "/",
@@ -69,7 +80,7 @@ export default function Topbar() {
                                 </>
                             ) : (
                                 <>
-                                    <span className="text-white mx-2">Hello, XYZ</span>
+                                    <span className="text-white mx-2">Hello, {userName}</span>
                                     <button className="btn btn-secondary mx-1" onClick={handleSignOut}>Sign Out</button>
                                 </>
                             )}
