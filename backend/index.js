@@ -62,16 +62,55 @@ app.post("/login", (req, res) => {
             }
 
             if (response) {
+                const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
+
                 const accessToken = jwt.sign({ email: email, username: username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
+
+                const expiresAt = dayjs().add(7, 'day').toDate();
                 const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET)
 
-                res.json({ accessToken: accessToken, refreshToken: refreshToken })
+                connection.query(addRefreshTokenQuery, [refreshToken, email, expiresAt], (err, result) => {
+                    if (err) {
+                        return res.sendStatus(500);
+                    }
+
+                    if (result.length > 0) {
+                        return res.sendStatus(409)
+                    }
+
+                    res.json({ accessToken: accessToken, refreshToken: refreshToken })
+                });
             } else {
                 return res.sendStatus(401);
             }
         });
     });
 });
+
+app.post("/logout", (req, res) => {
+    const { email } = req.body;
+
+    const findUserQuery = "SELECT * FROM refresh_tokens WHERE user_email = ?";
+    connection.query(findUserQuery, [email], (err, result) => {
+        if (err) {
+            return res.sendStatus(500);
+        }
+
+        if (result.length <= 0) {
+            return res.sendStatus(409);
+        }
+
+
+        const deleteQuery = "DELETE FROM refresh_tokens WHERE user_email = ?";
+        connection.query(deleteQuery, [email], (err) => {
+            if (err) {
+                return res.sendStatus(500);
+            }
+
+            return res.sendStatus(200);
+        });
+    });
+})
 
 // app.get("/me", (req, res) => {
 //     res.json({ user: req.user });
