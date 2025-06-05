@@ -44,7 +44,7 @@ app.post("/signup", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-    const { email, username, password } = req.body;
+    const { email, password } = req.body;
 
     const findUserQuery = "SELECT * FROM users WHERE email = ?";
     connection.query(findUserQuery, [email], async (err, result) => {
@@ -64,10 +64,10 @@ app.post("/login", (req, res) => {
             if (response) {
                 const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
 
-                const accessToken = jwt.sign({ email: email, username: username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
+                const accessToken = jwt.sign({ email: email, username: result[0].username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
 
                 const expiresAt = dayjs().add(7, 'day').toDate();
-                const refreshToken = jwt.sign({ email: email, username: username }, process.env.REFRESH_TOKEN_SECRET)
+                const refreshToken = jwt.sign({ email: email, username: result[0].username }, process.env.REFRESH_TOKEN_SECRET)
 
                 connection.query(addRefreshTokenQuery, [refreshToken, email, expiresAt], (err, result) => {
                     if (err) {
