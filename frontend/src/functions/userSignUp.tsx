@@ -7,12 +7,10 @@ const userSignUp = async (username: string, email: string, password: string) => 
         password
     })
         .then((res) => {
-            console.log(res);
             return res.data;
         })
         .catch((err) => {
-            console.log(err);
-            return err;
+            return null;
         })
 }
 

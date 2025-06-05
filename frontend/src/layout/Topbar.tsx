@@ -1,8 +1,12 @@
 import { useState } from "react"
 import userSignUp from "../functions/userSignUp";
 import userLogIn from "../functions/userLogIn";
+import userLogOut from "../functions/userLogOut";
+import { useCookies } from 'react-cookie';
 
 export default function Topbar() {
+    const [cookies, setCookie, removeCookie] = useCookies();
+
     const [showLogin, setShowLogin] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
 
@@ -23,6 +27,12 @@ export default function Topbar() {
             setUserLoggedIn(true);
             setShowLogin(false);
             setAccessToken(login.accessToken)
+
+            setCookie("refreshToken", login.refreshToken, {
+                path: "/",
+                maxAge: 604800,
+                secure: false,
+            });
         } else {
             setShowWrongInfo(true);
         }
@@ -36,7 +46,10 @@ export default function Topbar() {
     }
 
     const handleSignOut = async () => {
+        const logout = await userLogOut(userEmail);
+
         setAccessToken("");
+        removeCookie("refreshToken");
         setUserLoggedIn(false);
     }
 
