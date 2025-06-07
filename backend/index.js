@@ -47,16 +47,18 @@ app.post("/login", (req, res) => {
     const { email, password } = req.body;
 
     const findUserQuery = "SELECT * FROM users WHERE email = ?";
-    connection.query(findUserQuery, [email], async (err, result) => {
+    connection.query(findUserQuery, [email], async (err, userResult) => {
         if (err) {
             return res.sendStatus(500);
         }
 
-        if (result.length <= 0) {
+        if (userResult.length <= 0) {
             return res.sendStatus(409);
         }
 
-        bcrypt.compare(password, result[0].password, (error, response) => {
+        const user = userResult[0];
+
+        bcrypt.compare(password, user.password, (error, response) => {
             if (error) {
                 return res.sendStatus(500);
             }
@@ -69,16 +71,16 @@ app.post("/login", (req, res) => {
                         return res.sendStatus(500);
                     }
 
+                    const accessToken = jwt.sign({ email: email, username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
+
                     if (result.length > 0) {
-                        return res.sendStatus(409);
+                        return res.json({ accessToken, refreshToken: result[0].token });
                     }
 
                     const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
 
-                    const accessToken = jwt.sign({ email: email, username: result[0].username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
-
                     const expiresAt = dayjs().add(7, 'day').toDate();
-                    const refreshToken = jwt.sign({ email: email, username: result[0].username }, process.env.REFRESH_TOKEN_SECRET)
+                    const refreshToken = jwt.sign({ email: email, username: user.username }, process.env.REFRESH_TOKEN_SECRET)
 
                     connection.query(addRefreshTokenQuery, [refreshToken, email, expiresAt], (err) => {
                         if (err) {
