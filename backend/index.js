@@ -58,28 +58,37 @@ app.post("/login", (req, res) => {
 
         bcrypt.compare(password, result[0].password, (error, response) => {
             if (error) {
-                return res.sendStatus(500)
+                return res.sendStatus(500);
             }
 
             if (response) {
-                const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
+                const checkForExistingTokenQuery = "SELECT * FROM refresh_tokens WHERE user_email = ?"
 
-                const accessToken = jwt.sign({ email: email, username: result[0].username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
-
-                const expiresAt = dayjs().add(7, 'day').toDate();
-                const refreshToken = jwt.sign({ email: email, username: result[0].username }, process.env.REFRESH_TOKEN_SECRET)
-
-                connection.query(addRefreshTokenQuery, [refreshToken, email, expiresAt], (err, result) => {
+                connection.query(checkForExistingTokenQuery, [email], (err, result) => {
                     if (err) {
                         return res.sendStatus(500);
                     }
 
                     if (result.length > 0) {
-                        return res.sendStatus(409)
+                        return res.sendStatus(409);
                     }
 
-                    res.json({ accessToken: accessToken, refreshToken: refreshToken })
+                    const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
+
+                    const accessToken = jwt.sign({ email: email, username: result[0].username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
+
+                    const expiresAt = dayjs().add(7, 'day').toDate();
+                    const refreshToken = jwt.sign({ email: email, username: result[0].username }, process.env.REFRESH_TOKEN_SECRET)
+
+                    connection.query(addRefreshTokenQuery, [refreshToken, email, expiresAt], (err) => {
+                        if (err) {
+                            return res.sendStatus(500);
+                        }
+
+                        res.json({ accessToken: accessToken, refreshToken: refreshToken })
+                    });
                 });
+
             } else {
                 return res.sendStatus(401);
             }
@@ -99,7 +108,6 @@ app.post("/logout", (req, res) => {
         if (result.length <= 0) {
             return res.sendStatus(409);
         }
-
 
         const deleteQuery = "DELETE FROM refresh_tokens WHERE user_email = ?";
         connection.query(deleteQuery, [email], (err) => {
