@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 app.use(cors({
-    origin: "https://jacket235.github.io",
+    origin: "localhost:3000/",
     credentials: true
 }));
 
@@ -72,14 +72,15 @@ app.post("/login", (req, res) => {
                     connection.query(addRefreshTokenQuery, [refreshToken, email, expiresAt], (err) => {
                         if (err) return res.sendStatus(500);
 
-                        res.cookie("refreshToken", refreshToken, {
-                            httpOnly: true,
-                            secure: true,
-                            sameSite: "none",
-                            maxAge: 7 * 24 * 60 * 60 * 1000
-                        });
+                        // res.cookie("refreshToken", refreshToken, {
+                        //     httpOnly: true,
+                        //     secure: true,
+                        //     sameSite: "none",
+                        //     maxAge: 7 * 24 * 60 * 60 * 1000
+                        // });
+                        // Unfortunately cookies won't work as my backend and fronten are on different domains
 
-                        res.json({ accessToken: accessToken })
+                        res.json({ accessToken: accessToken, refreshToken })
                     });
                 });
 
