@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import userSignUp from "../functions/userSignUp";
 import userLogIn from "../functions/userLogIn";
 import userLogOut from "../functions/userLogOut";
-import { useCookies } from 'react-cookie';
 import jwt_decode, { jwtDecode } from "jwt-decode";
 import { Token } from "typescript";
+import userAutoLogIn from "../functions/userAutoLogIn";
 
 interface TokenPayload {
     email: string,
@@ -12,8 +12,6 @@ interface TokenPayload {
 }
 
 export default function Topbar() {
-    const [cookies, setCookie, removeCookie] = useCookies();
-
     const [showLogin, setShowLogin] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
 
@@ -27,7 +25,7 @@ export default function Topbar() {
 
     const [accessToken, setAccessToken] = useState<string>("");
 
-    const handleLogin = async () => {
+    const handleLogIn = async () => {
         const login = await userLogIn(userEmail, userPassword);
 
         if (login) {
@@ -36,14 +34,7 @@ export default function Topbar() {
             setAccessToken(login.accessToken)
 
             const tokenInfo = jwtDecode<TokenPayload>(login.accessToken);
-
             setUserName(tokenInfo.username);
-
-            setCookie("refreshToken", login.refreshToken, {
-                path: "/",
-                maxAge: 604800,
-                secure: false,
-            });
         } else {
             setShowWrongInfo(true);
         }
@@ -60,9 +51,20 @@ export default function Topbar() {
         const logout = await userLogOut(userEmail);
 
         setAccessToken("");
-        removeCookie("refreshToken");
         setUserLoggedIn(false);
     }
+
+    useEffect(() => {
+        const tryAutoLogin = async () => {
+            const data = await userAutoLogIn();
+
+            console.log("Trying");
+
+            if (data?.accessToken) {
+                setAccessToken(data.accessToken);
+            }
+        }
+    }, [])
 
     return (
         <>
@@ -114,7 +116,7 @@ export default function Topbar() {
                                 )}
                             </div>
                             <div className="modal-footer">
-                                <button className="btn btn-primary" onClick={handleLogin}>Log In</button>
+                                <button className="btn btn-primary" onClick={handleLogIn}>Log In</button>
                                 <button className="btn btn-secondary" onClick={() => setShowLogin(false)}>Cancel</button>
                             </div>
                         </div>
