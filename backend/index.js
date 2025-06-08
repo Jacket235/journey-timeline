@@ -94,7 +94,7 @@ app.post("/autologin", (req, res) => {
     jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
         if (err) return res.sendStatus(403);
 
-        const accessToken = jwt.sign({ email: decoded.email, username: decoded.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+        const accessToken = jwt.sign({ user_id: decoded.user_id, email: decoded.email, username: decoded.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
 
         res.json({ accessToken });
     });
