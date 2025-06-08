@@ -5,17 +5,14 @@ const bcrypt = require('bcrypt');
 const connection = require('./config');
 const jwt = require("jsonwebtoken");
 const dayjs = require("dayjs");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 
 const app = express();
 
-app.use(cors({
-    origin: "localhost:3000/",
-    credentials: true
-}));
+app.use(cors());
 
 app.use(express.json());
-app.use(cookieParser());
+// app.use(cookieParser());
 
 app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
@@ -63,7 +60,6 @@ app.post("/login", (req, res) => {
 
                     if (result.length > 0) return res.json({ accessToken });
 
-
                     const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
 
                     const expiresAt = dayjs().add(7, 'day').toDate();
@@ -80,7 +76,7 @@ app.post("/login", (req, res) => {
                         // });
                         // Unfortunately cookies won't work as my backend and fronten are on different domains
 
-                        res.json({ accessToken: accessToken, refreshToken })
+                        res.json({ accessToken, refreshToken })
                     });
                 });
 
@@ -92,7 +88,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/autologin", (req, res) => {
-    const token = req.cookies.refreshToken;
+    const { token } = req.body;
     if (!token) return res.sendStatus(401);
 
     jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
