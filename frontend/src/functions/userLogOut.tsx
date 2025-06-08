@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const userLogOut = async (email: string) => {
-    return axios.post("https://desktop-app-production.up.railway.app/logout", {
+    return axios.post("https://journey-timeline-backend.up.railway.app/logout", {
         email
     })
         .then((res) => {

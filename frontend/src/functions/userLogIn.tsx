@@ -1,11 +1,9 @@
 import axios from "axios";
 
 const userLogIn = (email: string, password: string) => {
-    return axios.post("https://desktop-app-production.up.railway.app/login", {
+    return axios.post("https://journey-timeline-backend.up.railway.app/login", {
         email,
         password
-    }, {
-        withCredentials: true
     })
         .then((res) => {
             return res.data

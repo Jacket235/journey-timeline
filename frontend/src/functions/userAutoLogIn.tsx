@@ -1,10 +1,12 @@
 import axios from "axios";
 
-const userAutoLogIn = () => {
-    return axios.post("https://desktop-app-production.up.railway.app/autologin", {}, {
-        withCredentials: true
+const userAutoLogIn = (refreshToken: string) => {
+    return axios.post("https://journey-timeline-backend.up.railway.app/autologin", {
+        token: refreshToken
     })
-        .then((res) => res.data)
+        .then((res) => {
+            return res.data
+        })
         .catch(() => null);
 }
 

@@ -1,39 +1,38 @@
 import { useEffect, useState } from "react"
-import userSignUp from "../functions/userSignUp";
-import userLogIn from "../functions/userLogIn";
-import userLogOut from "../functions/userLogOut";
 import jwt_decode, { jwtDecode } from "jwt-decode";
-import { Token } from "typescript";
-import userAutoLogIn from "../functions/userAutoLogIn";
+
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+
+import userSignUp from "../functions/userSignUp";
+import { useAuth } from "../context/AuthContext";
 
 interface TokenPayload {
+    user_id: number,
     email: string,
     username: string;
 }
 
 export default function Topbar() {
+    const { isLoggedIn, login, logout, autoLogin, accessToken } = useAuth();
+
     const [showLogin, setShowLogin] = useState(false);
     const [showSignUp, setShowSignUp] = useState(false);
-
     const [showWrongInfo, setShowWrongInfo] = useState(false);
 
     const [userName, setUserName] = useState<string>("");
     const [userEmail, setUserEmail] = useState<string>("");
     const [userPassword, setPassword] = useState<string>("");
 
-    const [userLoggedIn, setUserLoggedIn] = useState<boolean>(false);
-
-    const [accessToken, setAccessToken] = useState<string>("");
-
     const handleLogIn = async () => {
-        const login = await userLogIn(userEmail, userPassword);
+        const result = await login(userEmail, userPassword);
 
-        if (login) {
-            setUserLoggedIn(true);
+        if (result) {
             setShowLogin(false);
-            setAccessToken(login.accessToken)
+            localStorage.setItem("refreshToken", result.refreshToken);
 
-            const tokenInfo = jwtDecode<TokenPayload>(login.accessToken);
+            const tokenInfo = jwtDecode<TokenPayload>(result.accessToken);
             setUserName(tokenInfo.username);
         } else {
             setShowWrongInfo(true);
@@ -48,22 +47,27 @@ export default function Topbar() {
     }
 
     const handleSignOut = async () => {
-        const logout = await userLogOut(userEmail);
+        const result = await logout(userEmail);
 
-        setAccessToken("");
-        setUserLoggedIn(false);
+        localStorage.removeItem("refreshToken");
     }
 
     useEffect(() => {
         const tryAutoLogin = async () => {
-            const data = await userAutoLogIn();
+            const refreshToken = localStorage.getItem("refreshToken");
 
-            console.log("Trying");
+            if (!refreshToken) return;
+
+            const data = await autoLogin(refreshToken);
 
             if (data?.accessToken) {
-                setAccessToken(data.accessToken);
+                const tokenInfo = jwtDecode<TokenPayload>(data.accessToken);
+                setUserEmail(tokenInfo.email);
+                setUserName(tokenInfo.username);
             }
         }
+
+        tryAutoLogin();
     }, [])
 
     return (
@@ -75,15 +79,15 @@ export default function Topbar() {
                             <span className="h3">Plan your trips!</span>
                         </div>
                         <div className="col-6 d-flex align-items-center justify-content-end">
-                            {!userLoggedIn ? (
+                            {!isLoggedIn ? (
                                 <>
-                                    <button className="btn btn-primary mx-1" onClick={() => setShowLogin(true)}>Log In</button>
-                                    <button className="btn btn-primary mx-1" onClick={() => setShowSignUp(true)}>Sign Up</button>
+                                    <button className="btn btn-primary mx-1" onClick={() => setShowLogin(true)}><LoginIcon /> Log In</button>
+                                    <button className="btn btn-primary mx-1" onClick={() => setShowSignUp(true)}><AppRegistrationIcon /> Sign Up</button>
                                 </>
                             ) : (
                                 <>
                                     <span className="text-white mx-2">Hello, {userName}</span>
-                                    <button className="btn btn-secondary mx-1" onClick={handleSignOut}>Sign Out</button>
+                                    <button className="btn btn-secondary mx-1" onClick={handleSignOut}><LogoutIcon />Sign Out</button>
                                 </>
                             )}
                         </div>

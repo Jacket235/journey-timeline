@@ -1,0 +1,30 @@
+.timeline {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px;
+}
+
+.event {
+    display: flex;
+    justify-content: center;
+    border: 1px dashed black;
+    padding: 10px;
+    margin: 50px 3vw;
+}
+
+.connection-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+}
