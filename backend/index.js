@@ -56,14 +56,14 @@ app.post("/login", (req, res) => {
                 connection.query(checkForExistingTokenQuery, [email], (err, result) => {
                     if (err) return res.sendStatus(500);
 
-                    const accessToken = jwt.sign({ email: email, username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
+                    const accessToken = jwt.sign({ user_id: user.id, email: email, username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
 
                     if (result.length > 0) return res.json({ accessToken, refreshToken: result[0].token });
 
                     const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
 
                     const expiresAt = dayjs().add(7, 'day').toDate();
-                    const refreshToken = jwt.sign({ email: email, username: user.username }, process.env.REFRESH_TOKEN_SECRET)
+                    const refreshToken = jwt.sign({ user_id: user.id, email: email, username: user.username }, process.env.REFRESH_TOKEN_SECRET)
 
                     connection.query(addRefreshTokenQuery, [refreshToken, email, expiresAt], (err) => {
                         if (err) return res.sendStatus(500);
@@ -118,9 +118,27 @@ app.post("/logout", (req, res) => {
     });
 })
 
-// app.get("/me", (req, res) => {
-//     res.json({ user: req.user });
-// })
+app.get("/timelinedata", authenticateToken, (req, res) => {
+    const userId = req.user.userId;
+
+    const getEventsQuery = "SELECT * FROM events WHERE user_id = ?";
+    const getConnectionsQuery = "SELECT * FROM connections WHERE user_id = ?";
+
+    connection.query(getEventsQuery, [userId], (err, eventsResult) => {
+        if (err) return res.sendStatus(500);
+
+        connection.query(getConnectionsQuery, [userId], (err, connectionsResult) => {
+            if (err) return res.sendStatus(500)
+
+            res.json({
+                events: eventsResult,
+                connections: connectionsResult
+            });
+        })
+    })
+
+    res.json({ user: req.user });
+})
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
