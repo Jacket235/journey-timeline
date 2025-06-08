@@ -43,7 +43,7 @@ app.post("/login", (req, res) => {
     connection.query(findUserQuery, [email], (err, userResult) => {
         if (err) return res.sendStatus(500);
 
-        if (userResult.length <= 0) return res.sendStatus(409);
+        if (userResult.length <= 0) return res.sendStatus(401);
 
         const user = userResult[0];
 
@@ -58,7 +58,7 @@ app.post("/login", (req, res) => {
 
                     const accessToken = jwt.sign({ email: email, username: user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
 
-                    if (result.length > 0) return res.json({ accessToken });
+                    if (result.length > 0) return res.json({ accessToken, refreshToken: result[0].token });
 
                     const addRefreshTokenQuery = "INSERT INTO refresh_tokens (token, user_email, expires_at) VALUES (?, ?, ?) ";
 
