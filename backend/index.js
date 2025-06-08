@@ -119,7 +119,7 @@ app.post("/logout", (req, res) => {
 })
 
 app.get("/timelinedata", authenticateToken, (req, res) => {
-    const { accessToken } = req.body;
+    const userId = req.user.user_id;
 
     const getEventsQuery = "SELECT * FROM events WHERE user_id = ?";
     const getConnectionsQuery = "SELECT * FROM connections WHERE user_id = ?";
