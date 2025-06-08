@@ -74,7 +74,7 @@ app.post("/login", (req, res) => {
                         //     sameSite: "none",
                         //     maxAge: 7 * 24 * 60 * 60 * 1000
                         // });
-                        // Unfortunately cookies won't work as my backend and fronten are on different domains
+                        // Unfortunately cookies won't work as my backend and fronten are on different domains.
 
                         res.json({ accessToken, refreshToken })
                     });
