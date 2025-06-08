@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: "https://jacket235.github.io",
     credentials: true
 }));
 
@@ -74,8 +74,8 @@ app.post("/login", (req, res) => {
 
                         res.cookie("refreshToken", refreshToken, {
                             httpOnly: true,
-                            secure: false,
-                            sameSite: "lax",
+                            secure: true,
+                            sameSite: "none",
                             maxAge: 7 * 24 * 60 * 60 * 1000
                         });
 
