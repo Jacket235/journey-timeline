@@ -74,7 +74,7 @@ app.post("/login", (req, res) => {
                         //     sameSite: "none",
                         //     maxAge: 7 * 24 * 60 * 60 * 1000
                         // });
-                        // Unfortunately cookies won't work as my backend and fronten are on different domains.
+                        // Unfortunately cookies won't work as my backend and frontend are on different domains.
 
                         res.json({ accessToken, refreshToken })
                     });
@@ -118,7 +118,7 @@ app.post("/logout", (req, res) => {
     });
 })
 
-app.get("/timelinedata", authenticateToken, (req, res) => {
+app.get("/gettimelinedata", authenticateToken, (req, res) => {
     const userId = req.user.user_id;
 
     const getEventsQuery = "SELECT * FROM events WHERE user_id = ?";
@@ -136,6 +136,14 @@ app.get("/timelinedata", authenticateToken, (req, res) => {
             });
         })
     })
+})
+
+app.post("/removeevent", authenticateToken, (req, res) => {
+    res.json({ message: "dupa" });
+})
+
+app.post("/removeconnection", authenticateToken, (req, res) => {
+    res.json({ message: "dupa" });
 })
 
 function authenticateToken(req, res, next) {

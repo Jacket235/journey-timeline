@@ -28,3 +28,17 @@
     pointer-events: none;
     z-index: 0;
 }
+
+@keyframes dashMove {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.path-animated {
+    stroke: rgb(106, 0, 255);
+    stroke-width: 2;
+    stroke-dasharray: 10;
+    stroke-dashoffset: 1000;
+    animation: dashMove 20s linear infinite;
+}
