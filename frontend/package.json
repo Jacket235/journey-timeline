@@ -1,6 +1,6 @@
 {
-  "name": "database-app",
-  "homepage": "https://Jacket235.github.io/database-app",
+  "name": "journey-timeline",
+  "homepage": "https://Jacket235.github.io/journey-timeline",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
