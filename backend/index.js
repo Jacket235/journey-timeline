@@ -9,7 +9,9 @@ const dayjs = require("dayjs");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://jacket235.github.io' // <-- your allowed origin
+}));
 
 app.use(express.json());
 // app.use(cookieParser());
