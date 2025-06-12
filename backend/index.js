@@ -9,9 +9,10 @@ const dayjs = require("dayjs");
 
 const app = express();
 
-app.use(cors({
-    origin: 'https://jacket235.github.io' // <-- your allowed origin
-}));
+app.use(cors());
+// app.use(cors({
+//     origin: 'https://jacket235.github.io'
+// }));
 
 app.use(express.json());
 // app.use(cookieParser());
@@ -118,26 +119,6 @@ app.post("/logout", (req, res) => {
             return res.sendStatus(200);
         });
     });
-})
-
-app.get("/gettimelinedata", authenticateToken, (req, res) => {
-    const userId = req.user.user_id;
-
-    const getEventsQuery = "SELECT * FROM events WHERE user_id = ?";
-    const getConnectionsQuery = "SELECT * FROM connections WHERE user_id = ?";
-
-    connection.query(getEventsQuery, [userId], (err, eventsResult) => {
-        if (err) return res.sendStatus(500);
-
-        connection.query(getConnectionsQuery, [userId], (err, connectionsResult) => {
-            if (err) return res.sendStatus(500)
-
-            res.json({
-                events: eventsResult,
-                connections: connectionsResult
-            });
-        })
-    })
 })
 
 app.post("/removeevent", authenticateToken, (req, res) => {
