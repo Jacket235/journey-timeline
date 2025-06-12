@@ -42,3 +42,9 @@
     stroke-dashoffset: 1000;
     animation: dashMove 20s linear infinite;
 }
+
+.no-outline {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}

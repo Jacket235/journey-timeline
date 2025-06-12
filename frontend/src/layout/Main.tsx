@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from "../context/AuthContext";
 import './main.css';
+import ManageEventsModal from '../components/manageEventsModal'
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import getTimelineData from '../functions/getTimelineData';
@@ -8,7 +9,8 @@ import getTimelineData from '../functions/getTimelineData';
 interface Event {
     id: number,         // Unique globally
     name: string,
-    step_id: number      // Which step it belongs to
+    step_id: number,      // Which step it belongs to
+    position: number
 }
 
 interface Connection {
@@ -21,7 +23,6 @@ export default function Main() {
     const { isLoggedIn, accessToken } = useAuth();
 
     const [selectedStep, setSelectedStep] = useState<number | null>(null);
-
     const [events, setEvents] = useState<Event[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [eventsPos, setEventsPos] = useState<Record<number, {
@@ -36,8 +37,6 @@ export default function Main() {
     }>>({});
 
     const [tempEvents, setTempEvents] = useState(events);
-    const [draggedEventId, setDraggedEventId] = useState<number | null>(null);
-    const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
     const [highlightedEventChain, setHighlightedEventChain] = useState<Set<number>>(new Set());
 
     function getConnectedEventChain(startId: number, visited = new Set<number>()): Set<number> {
@@ -235,71 +234,14 @@ export default function Main() {
             </div>
 
             {showManageTimeLine && (
-                <div className="modal d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Manage your timeline</h5>
-                                <button type="button" className="btn-close" onClick={() => setShowManageTimeline(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="mb-3 d-flex flex-column">
-                                    <div className="form-floating">
-                                        <select className="form-select" id="select-step" value={selectedStep ?? ''} onChange={(e) => setSelectedStep(Number(e.target.value))}>
-                                            <option defaultValue="">Step</option>
-                                            <option value="0">1</option>
-                                            <option value="1">2</option>
-                                            <option value="2">3</option>
-                                            <option value="3">4</option>
-                                        </select>
-                                        <label htmlFor="select-step">Select the step to modify</label>
-                                    </div>
-                                </div>
-                                <div className="mb-3 d-flex flex-column">
-                                    {selectedStep !== null && selectedStep !== undefined && (
-                                        tempEvents.filter(e => e.step_id === selectedStep).map(event => (
-                                            <div
-                                                key={event.id}
-                                                className="border rounded p-1 my-1 d-flex justify-content-between align-items-center"
-                                                draggable
-                                                style={{ cursor: "move" }}
-                                                onDragStart={(e) => setDraggedEventId(event.id)}
-                                                onDragOver={(e) => e.preventDefault()}
-                                                onDrop={(e) => {
-                                                    if (draggedEventId === null || draggedEventId === event.id) return;
-
-                                                    const draggedIndex = tempEvents.findIndex(e => e.id === draggedEventId);
-                                                    const dropIndex = tempEvents.findIndex(e => e.id === event.id);
-
-                                                    const updated = [...tempEvents];
-                                                    const [movedItem] = updated.splice(draggedIndex, 1);
-                                                    updated.splice(dropIndex, 0, movedItem);
-
-                                                    setTempEvents(updated);
-                                                }}>
-                                                {event.name}
-                                                <button className="btn btn-danger" onClick={() => setTempEvents(tempEvents.filter(e => e.id !== event.id))}>
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-primary" onClick={() => {
-                                    setEvents(tempEvents);
-                                    setShowManageTimeline(false);
-                                }}>
-                                    Save
-                                </button>
-                                <button className="btn btn-danger" onClick={() => setShowManageTimeline(false)}>
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ManageEventsModal
+                    show={showManageTimeLine}
+                    onClose={() => setShowManageTimeline(false)}
+                    events={events}
+                    setEvents={setEvents}
+                    selectedStep={selectedStep}
+                    setSelectedStep={setSelectedStep}
+                />
             )}
         </>
     );
