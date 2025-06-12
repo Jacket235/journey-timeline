@@ -140,12 +140,27 @@ app.get("/gettimelinedata", authenticateToken, (req, res) => {
     })
 })
 
-app.post("/removeevent", authenticateToken, (req, res) => {
-    res.json({ message: "removeevent" });
+app.post("/eventadd", authenticateToken, (req, res) => {
+    res.json({ message: "eventadd" });
+})
+app.post("/connectionadd", authenticateToken, (req, res) => {
+    res.json({ message: "connectionadd" });
 })
 
-app.post("/removeconnection", authenticateToken, (req, res) => {
-    res.json({ message: "removeconnection" });
+app.post("/eventremove", authenticateToken, (req, res) => {
+    const { eventIds } = req.body;
+
+    const placeholders = eventIds.map(() => '?').join(', ');
+    const removeEventsQuery = `DELETE FROM events WHERE id IN (${placeholders})`;
+
+    connection.query(removeEventsQuery, eventIds, (err) => {
+        if (err) return res.sendStatus(500);
+        res.sendStatus(200);
+    });
+})
+
+app.post("/connectionremove", authenticateToken, (req, res) => {
+    res.json({ message: "connectionremove" });
 })
 
 function authenticateToken(req, res, next) {
