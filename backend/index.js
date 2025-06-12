@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt');
 const connection = require('./config');
 const jwt = require("jsonwebtoken");
 const dayjs = require("dayjs");
-// const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -121,12 +120,32 @@ app.post("/logout", (req, res) => {
     });
 })
 
+app.get("/gettimelinedata", authenticateToken, (req, res) => {
+    const userId = req.user.user_id;
+
+    const getEventsQuery = "SELECT * FROM events WHERE user_id = ?";
+    const getConnectionsQuery = "SELECT * FROM connections WHERE user_id = ?";
+
+    connection.query(getEventsQuery, [userId], (err, eventsResult) => {
+        if (err) return res.sendStatus(500);
+
+        connection.query(getConnectionsQuery, [userId], (err, connectionsResult) => {
+            if (err) return res.sendStatus(500)
+
+            res.json({
+                events: eventsResult,
+                connections: connectionsResult
+            });
+        })
+    })
+})
+
 app.post("/removeevent", authenticateToken, (req, res) => {
-    res.json({ message: "dupa" });
+    res.json({ message: "removeevent" });
 })
 
 app.post("/removeconnection", authenticateToken, (req, res) => {
-    res.json({ message: "dupa" });
+    res.json({ message: "removeconnection" });
 })
 
 function authenticateToken(req, res, next) {
