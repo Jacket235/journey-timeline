@@ -14,7 +14,6 @@ app.use(cors());
 // }));
 
 app.use(express.json());
-// app.use(cookieParser());
 
 app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
