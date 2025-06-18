@@ -139,7 +139,37 @@ app.get("/gettimelinedata", authenticateToken, (req, res) => {
     })
 })
 
-app.post("syncevents", authenticateToken, (req, res) => {
+app.post("/syncevents", authenticateToken, (req, res) => {
+    const { added = [], modified = [], removed = [] } = req.body;
+    const userId = req.user.user_id;
+
+    const addEventQuery = "INSERT INTO events (name, step_id, user_id, position) VALUES (?, ?, ?, ?) RETURNING id";
+    for (const event of added) {
+        connection.query(addEventQuery, [event.name, event.step_id, userId, event.position], (err, addEventResult) => {
+            if (err) return res.sendStatus(500);
+
+            res.json({ message: "Added" });
+        })
+    }
+
+    const modifyEventQuery = "UPDATE events SET name = ?, step_id = ?, position = ? WHERE id = ? AND user_id = ?";
+    for (const event of modified) {
+        connection.query(modifyEventQuery, [event.name, event.step_id, event.position, event.id, userId], (err, modifyEventResult) => {
+            if (err) return res.sendStatus(500);
+
+            res.json({ message: "Modified" });
+        })
+    }
+
+    const removeEventQuery = "DELETE FROM events WHERE id = ? AND user_id = ?";
+    for (const event of removed) {
+        connection.query(removeEventQuery, [event.id, userId], (err, removeEventResult) => {
+            if (err) res.sendStatus(500);
+
+            res.json({ message: "Removed" });
+        })
+    }
+
     res.json({ message: "syncevents" });
 })
 
