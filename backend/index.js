@@ -163,6 +163,8 @@ app.post("/syncevents", authenticateToken, (req, res) => {
             if (err) res.sendStatus(500);
         })
     }
+
+    res.json({ message: "All went successfully" });
 })
 
 function authenticateToken(req, res, next) {
