@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from "../context/AuthContext";
 import './main.css';
-import ManageEventsModal from '../components/manageEventsModal'
+import ManageTimelineModal from '../components/ManageTimelineModal';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import getTimelineData from '../functions/getTimelineData';
@@ -22,7 +22,6 @@ export default function Main() {
     const [showManageTimeLine, setShowManageTimeline] = useState(false);
     const { isLoggedIn, accessToken } = useAuth();
 
-    const [selectedStep, setSelectedStep] = useState<number | null>(null);
     const [events, setEvents] = useState<Event[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [eventsPos, setEventsPos] = useState<Record<number, {
@@ -210,7 +209,7 @@ export default function Main() {
                             <div className="timeline">
                                 {[0, 1, 2, 3].map((step, stepIndex) => (
                                     <div key={stepIndex} className="step">
-                                        {events.filter(e => e.step_id === stepIndex).map(event => (
+                                        {events.filter(e => e.step_id === stepIndex).sort((a, b) => a.position - b.position).map(event => (
                                             <div
                                                 key={event.id}
                                                 data-id={event.id}
@@ -234,13 +233,11 @@ export default function Main() {
             </div>
 
             {showManageTimeLine && (
-                <ManageEventsModal
+                <ManageTimelineModal
                     show={showManageTimeLine}
                     onClose={() => setShowManageTimeline(false)}
                     events={events}
                     setEvents={setEvents}
-                    selectedStep={selectedStep}
-                    setSelectedStep={setSelectedStep}
                 />
             )}
         </>
