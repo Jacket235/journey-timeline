@@ -143,7 +143,7 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     const { added = [], modified = [], removed = [] } = req.body;
     const userId = req.user.user_id;
 
-    const addEventQuery = "INSERT INTO events (name, step_id, user_id, position) VALUES (?, ?, ?, ?) RETURNING id";
+    const addEventQuery = "INSERT INTO events (name, step_id, user_id, position) VALUES (?, ?, ?, ?)";
     for (const event of added) {
         connection.query(addEventQuery, [event.name, event.step_id, userId, event.position], (err, addEventResult) => {
             if (err) return res.sendStatus(500);
