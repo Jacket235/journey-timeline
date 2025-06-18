@@ -147,8 +147,6 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     for (const event of added) {
         connection.query(addEventQuery, [event.name, event.step_id, userId, event.position], (err, addEventResult) => {
             if (err) return res.sendStatus(500);
-
-            res.json({ message: "Added" });
         })
     }
 
@@ -156,8 +154,6 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     for (const event of modified) {
         connection.query(modifyEventQuery, [event.name, event.step_id, event.position, event.id, userId], (err, modifyEventResult) => {
             if (err) return res.sendStatus(500);
-
-            res.json({ message: "Modified" });
         })
     }
 
@@ -165,12 +161,8 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     for (const event of removed) {
         connection.query(removeEventQuery, [event.id, userId], (err, removeEventResult) => {
             if (err) res.sendStatus(500);
-
-            res.json({ message: "Removed" });
         })
     }
-
-    res.json({ message: "syncevents" });
 })
 
 function authenticateToken(req, res, next) {
