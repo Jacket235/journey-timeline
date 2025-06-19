@@ -143,48 +143,87 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     const { added = [], modified = [], removed = [] } = req.body;
     const userId = req.user.user_id;
 
-    if (!added.length && !modified.length && !removed.length) return res.json({ message: "No changes to events" })
+    if (!added.length && !modified.length && !removed.length) {
+        return res.json({ message: "No changes to events" });
+    }
+
+    const promises = [];
 
     const addEventQuery = "INSERT INTO events (name, step_id, user_id, position) VALUES (?, ?, ?, ?)";
     for (const event of added) {
-        connection.query(addEventQuery, [event.name, event.step_id, userId, event.position], (err, addEventResult) => {
-            if (err) return res.sendStatus(500);
-        })
+        promises.push(new Promise((resolve, reject) => {
+            connection.query(addEventQuery, [event.name, event.step_id, userId, event.position], (err) => {
+                if (err) return reject(err);
+                resolve(null);
+            });
+        }));
     }
 
     const modifyEventQuery = "UPDATE events SET name = ?, step_id = ?, position = ? WHERE id = ? AND user_id = ?";
     for (const event of modified) {
-        connection.query(modifyEventQuery, [event.name, event.step_id, event.position, event.id, userId], (err, modifyEventResult) => {
-            if (err) return res.sendStatus(500);
-        })
+        promises.push(new Promise((resolve, reject) => {
+            connection.query(modifyEventQuery, [event.name, event.step_id, event.position, event.id, userId], (err) => {
+                if (err) return reject(err);
+                resolve(null);
+            });
+        }));
     }
 
     const removeEventQuery = "DELETE FROM events WHERE id = ? AND user_id = ?";
     for (const event of removed) {
-        connection.query(removeEventQuery, [event.id, userId], (err, removeEventResult) => {
-            if (err) res.sendStatus(500);
-        })
+        promises.push(new Promise((resolve, reject) => {
+            connection.query(removeEventQuery, [event.id, userId], (err) => {
+                if (err) return reject(err);
+                resolve(null);
+            });
+        }));
     }
-})
+
+    Promise.all(promises)
+        .then(() => res.json({ message: "Events synced successfully" }))
+        .catch(err => {
+            console.error("Sync events error:", err);
+            res.sendStatus(500);
+        });
+});
 
 app.post("/syncconnections", authenticateToken, (req, res) => {
     const { connected = [], disconnected = [] } = req.body;
     const userId = req.user.user_id;
 
+    if (!connected.length && !disconnected.length) {
+        return res.json({ message: "No changes to connections" });
+    }
+
+    const promises = [];
+
     const addConnectionQuery = "INSERT INTO connections (from_event_id, to_event_id, user_id) VALUES (?, ?, ?)";
     for (const conn of connected) {
-        connection.query(addConnectionQuery, [conn.from_event_id, conn.to_event_id, userId], (err) => {
-            if (err) return res.sendStatus(500);
-        });
+        promises.push(new Promise((resolve, reject) => {
+            connection.query(addConnectionQuery, [conn.from_event_id, conn.to_event_id, userId], (err) => {
+                if (err) return reject(err);
+                resolve(null);
+            });
+        }));
     }
 
     const removeConnectionQuery = "DELETE FROM connections WHERE from_event_id = ? AND to_event_id = ? AND user_id = ?";
     for (const conn of disconnected) {
-        connection.query(removeConnectionQuery, [conn.from_event_id, conn.to_event_id, userId], (err) => {
-            if (err) return res.sendStatus(500);
-        });
+        promises.push(new Promise((resolve, reject) => {
+            connection.query(removeConnectionQuery, [conn.from_event_id, conn.to_event_id, userId], (err) => {
+                if (err) return reject(err);
+                resolve(null);
+            });
+        }));
     }
-})
+
+    Promise.all(promises)
+        .then(() => res.json({ message: "Connections synced successfully" }))
+        .catch(err => {
+            console.error("Sync connections error:", err);
+            res.sendStatus(500);
+        });
+});
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
