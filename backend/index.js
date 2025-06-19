@@ -163,8 +163,6 @@ app.post("/syncevents", authenticateToken, (req, res) => {
             if (err) res.sendStatus(500);
         })
     }
-
-    res.json({ message: "All went successfully" });
 })
 
 app.post("/syncconnections", authenticateToken, (req, res) => {
@@ -184,8 +182,6 @@ app.post("/syncconnections", authenticateToken, (req, res) => {
             if (err) return res.sendStatus(500);
         });
     }
-
-    res.json({ message: "Connections synced successfully" });
 })
 
 function authenticateToken(req, res, next) {
