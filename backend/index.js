@@ -167,6 +167,27 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     res.json({ message: "All went successfully" });
 })
 
+app.post("/syncconnections", authenticateToken, (req, res) => {
+    const { connected = [], disconnected = [] } = req.body;
+    const userId = req.user.user_id;
+
+    const addConnectionQuery = "INSERT INTO connections (from_event_id, to_event_id, user_id) VALUES (?, ?, ?)";
+    for (const conn of connected) {
+        connection.query(addConnectionQuery, [conn.from_event_id, conn.to_event_id, userId], (err) => {
+            if (err) return res.sendStatus(500);
+        });
+    }
+
+    const removeConnectionQuery = "DELETE FROM connections WHERE from_event_id = ? AND to_event_id = ? AND user_id = ?";
+    for (const conn of disconnected) {
+        connection.query(removeConnectionQuery, [conn.from_event_id, conn.to_event_id, userId], (err) => {
+            if (err) return res.sendStatus(500);
+        });
+    }
+
+    res.json({ message: "Connections synced successfully" });
+})
+
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
