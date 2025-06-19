@@ -143,9 +143,7 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     const { added = [], modified = [], removed = [] } = req.body;
     const userId = req.user.user_id;
 
-    if (!added.length && !modified.length && !removed.length) {
-        return res.json({ message: "No changes to events" });
-    }
+    if (!added.length && !modified.length && !removed.length) return res.json({ message: "No changes to events" });
 
     const promises = [];
 
@@ -191,9 +189,7 @@ app.post("/syncconnections", authenticateToken, (req, res) => {
     const { connected = [], disconnected = [] } = req.body;
     const userId = req.user.user_id;
 
-    if (!connected.length && !disconnected.length) {
-        return res.json({ message: "No changes to connections" });
-    }
+    if (!connected.length && !disconnected.length) return res.json({ message: "No changes to connections" });
 
     const promises = [];
 

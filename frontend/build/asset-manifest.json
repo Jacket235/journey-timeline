@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/journey-timeline/static/css/main.8d368f6e.css",
-    "main.js": "/journey-timeline/static/js/main.6466b6aa.js",
+    "main.js": "/journey-timeline/static/js/main.6f720273.js",
     "index.html": "/journey-timeline/index.html",
     "main.8d368f6e.css.map": "/journey-timeline/static/css/main.8d368f6e.css.map",
-    "main.6466b6aa.js.map": "/journey-timeline/static/js/main.6466b6aa.js.map"
+    "main.6f720273.js.map": "/journey-timeline/static/js/main.6f720273.js.map"
   },
   "entrypoints": [
     "static/css/main.8d368f6e.css",
-    "static/js/main.6466b6aa.js"
+    "static/js/main.6f720273.js"
   ]
 }

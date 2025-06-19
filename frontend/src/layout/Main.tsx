@@ -238,6 +238,8 @@ export default function Main() {
                     onClose={() => setShowManageTimeline(false)}
                     events={events}
                     setEvents={setEvents}
+                    connections={connections}
+                    setConnections={setConnections}
                 />
             )}
         </>
