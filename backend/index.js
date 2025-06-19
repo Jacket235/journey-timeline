@@ -143,6 +143,8 @@ app.post("/syncevents", authenticateToken, (req, res) => {
     const { added = [], modified = [], removed = [] } = req.body;
     const userId = req.user.user_id;
 
+    if (!added.length && !modified.length && !removed.length) return res.json({ message: "No changes to events" })
+
     const addEventQuery = "INSERT INTO events (name, step_id, user_id, position) VALUES (?, ?, ?, ?)";
     for (const event of added) {
         connection.query(addEventQuery, [event.name, event.step_id, userId, event.position], (err, addEventResult) => {
