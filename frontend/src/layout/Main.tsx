@@ -83,7 +83,12 @@ export default function Main() {
 
     useEffect(() => {
         const fetchTimelineData = async () => {
-            if (!accessToken) return;
+            if (!accessToken) {
+                setEvents([]);
+                setConnections([]);
+
+                return;
+            };
 
             const result = await getTimelineData(accessToken);
 

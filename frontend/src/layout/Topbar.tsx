@@ -21,6 +21,9 @@ export default function Topbar() {
     const [showSignUp, setShowSignUp] = useState(false);
     const [showWrongInfo, setShowWrongInfo] = useState(false);
 
+    const [showWrongRegisterInfo, setShowWrongRegisterInfo] = useState(false);
+    const [wrongRegisterReason, setWrongRegisterReason] = useState<string | null>(null);
+
     const [userName, setUserName] = useState<string>("");
     const [userEmail, setUserEmail] = useState<string>("");
     const [userPassword, setPassword] = useState<string>("");
@@ -42,8 +45,13 @@ export default function Topbar() {
     const handleRegister = async () => {
         const register = await userSignUp(userName, userEmail, userPassword);
 
-        setShowSignUp(false);
-        setShowLogin(true);
+        if (register.success) {
+            setShowSignUp(false);
+            setShowLogin(true);
+        } else {
+            setShowWrongRegisterInfo(true);
+            setWrongRegisterReason(register.message);
+        }
     }
 
     const handleSignOut = async () => {
@@ -150,6 +158,11 @@ export default function Topbar() {
                                     <label className="form-label">Password</label>
                                     <input type="password" className="form-control" value={userPassword} onChange={(e) => setPassword(e.target.value)} />
                                 </div>
+                                {showWrongRegisterInfo && (
+                                    <div className="text-danger text-center fw-bold mt-2">
+                                        {wrongRegisterReason}
+                                    </div>
+                                )}
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-primary" onClick={handleRegister}>Register</button>
