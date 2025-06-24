@@ -18,21 +18,21 @@ app.use(express.json());
 app.post("/signup", (req, res) => {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password) return res.sendStatus(400);
+    if (!username || !email || !password) return res.json({ success: false, error: "Missing username, email or password." });
 
     const checkQuery = "SELECT * FROM users WHERE username = ? OR email = ?";
     connection.query(checkQuery, [username, email], async (err, result) => {
-        if (err) return res.status(500).json({ success: false, error: "Database error" });
+        if (err) return res.status(500).json({ success: false, error: "Database error. Failed to check for existing user." });
 
-        if (result.length > 0) return res.status(409).json({ success: false, error: "Username or E-mail taken" });
+        if (result.length > 0) return res.json({ success: false, error: "Username or E-mail taken" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
         connection.query(insertQuery, [username, email, hashedPassword], (err, result) => {
-            if (err) return res.sendStatus(500);
+            if (err) return res.json({ success: false, message: "Database error. Failed to create user." });
 
-            return res.json({ success: true });
+            return res.json({ success: true, message: "" });
         });
     })
 });
