@@ -8,7 +8,6 @@ const dayjs = require("dayjs");
 
 const app = express();
 
-app.use(cors());
 app.use(cors({
     origin: 'https://jacket235.github.io'
 }));
